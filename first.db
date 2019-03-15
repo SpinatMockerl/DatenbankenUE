@@ -1,0 +1,9 @@
+
+
+CREATE TABLE Person (
+SVNr int PRIMARY KEY,
+Vorname varchar(20) not null,
+Nachname varchar(20) not null);
+
+INSERT INTO Person VALUES (2000111180, "Herbert", "Sandner");
+INSERT INTO Person VALUES (1234567890, "Elisabeth", "Berger");
