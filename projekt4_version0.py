@@ -37,12 +37,14 @@ connection.close()
 
 app = Flask(__name__)
 
+
 @app.route('/insertPerson')
 # access page: http://localhost:5000/insertPerson
 def newPerson():
-    return render_template('person.html')
-
+    return render_template('templates/person.html')
 
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug=True)
+
+# env FLASK_APP=hello.py flask run
