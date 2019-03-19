@@ -1,5 +1,6 @@
 import sqlite3
-from flask import Flask, render_template
+from flask import Flask, render_template, make_response, request, session, flash
+import os
 
 #####################################################################################################################
 # Tutorial: https://www.youtube.com/watch?v=o-vsdfCBpsU
@@ -35,9 +36,44 @@ connection.close()
 #####################################################################################################################
 # insert into person table by filling out html form
 
+
+# Flask constructior: define application as Flask object
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
+
+# Flask route() function: tells app which URL should be called
+# used to bind URL to function ( also possible with .add_url_rule() )
+@app.route('/home')
+def home():
+    return render_template(('home.html'))
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        SvNr = request.form['SvNr']
+
+        try:
+            connection = sqlite3.connect('DatabaseVersion0.db')
+            curs = connection.cursor()
+            curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,) )
+            SvNr_SQL = curs.fetchone()[0]
+            print(SvNr_SQL)
+            connection.commit()
+            connection.close()
+            if SvNr == SvNr_SQL:
+                session['SvNr'] = request.form['SvNr']
+                #return 'User exists'
+                return render_template(('person.html'))
+        except TypeError as error:
+            return 'please create user'
 
 
+
+        #response.set_cookie('SvNr', SvNr)
+        #response = make_response(render_template('login.html'))
+
+
+<<<<<<< HEAD
 @app.route('/insertPerson')
 # access page: http://localhost:5000/insertPerson
 def newPerson():
@@ -48,3 +84,28 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 # env FLASK_APP=hello.py flask run
+=======
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    return render_template(('register.html'))
+
+@app.route('/userEnvironment')
+def userEnvironment():
+    identification = request.cookies.get('SvNr')
+    return '<h1>welcome ' + identification + '</h1>'
+
+
+#@app.route('/insertPerson')
+# access page: http://localhost:5000/insertPerson
+#def newPerson():
+#    return render_template('person.html')
+
+
+
+
+
+if __name__ == '__main__':
+    # Flask .run() function: runs application on local developent server
+    # debug = True will autoatically update site when code changes
+    app.run(debug = True)
+>>>>>>> workingstation-eva
