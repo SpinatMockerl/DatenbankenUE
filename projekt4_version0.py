@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, render_template
+from flask import Flask, render_template, make_response, request
 
 #####################################################################################################################
 # Tutorial: https://www.youtube.com/watch?v=o-vsdfCBpsU
@@ -37,10 +37,25 @@ connection.close()
 
 app = Flask(__name__)
 
-@app.route('/insertPerson')
+
+@app.route('/home')
+def home():
+    return render_template(('home.html'))
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        response = make_response(render_template('login.html'))
+        return response
+
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    return render_template(('register.html'))
+
+#@app.route('/insertPerson')
 # access page: http://localhost:5000/insertPerson
-def newPerson():
-    return render_template('person.html')
+#def newPerson():
+#    return render_template('person.html')
 
 
 
