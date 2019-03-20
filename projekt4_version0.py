@@ -1,6 +1,10 @@
+#!/usr/bin/env python
+# coding: utf8
+
 import sqlite3
-from flask import Flask, render_template, make_response, request, session, flash
+from flask import Flask, render_template, make_response, request, session
 import os
+
 
 #####################################################################################################################
 # Tutorial: https://www.youtube.com/watch?v=o-vsdfCBpsU
@@ -13,12 +17,12 @@ curs = connection.cursor()
 
 # Create Tables
 # enter sql statements in doc string format
-curs.execute('''CREATE TABLE IF NOT EXISTS 
-    Person(SVNr int(10), Vorname varchar(10), 
-    Nachname varchar(10), PLZ int, Ort varchar(10), 
+curs.execute('''CREATE TABLE IF NOT EXISTS
+    Person(SVNr int(10), Vorname varchar(10),
+    Nachname varchar(10), PLZ int, Ort varchar(10),
     Straße varchar(50), HausNr int(3), TelefonNr int, PRIMARY KEY (SVNr))''')
 
-curs.execute('''CREATE TABLE IF NOT EXISTS Telefonnummer( SVNr int(10), Telefon_nr int(12), \
+curs.execute('''CREATE TABLE IF NOT EXISTS Telefonnummer( SVNr int(10), Telefon_nr int(12),
     PRIMARY KEY (SVNr, Telefon_nr), FOREIGN KEY (SVNr) REFERENCES Personen(SVNr))''')
 
 # insert data (if it does not exist)
@@ -53,11 +57,13 @@ def login():
         SvNr = request.form['SvNr']
 
         try:
+            ## Error: TypeError: View function did not have valid response
             connection = sqlite3.connect('DatabaseVersion0.db')
             curs = connection.cursor()
             curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,) )
             SvNr_SQL = curs.fetchone()[0]
             print(SvNr_SQL)
+            print(SvNr)
             connection.commit()
             connection.close()
             if SvNr == SvNr_SQL:
@@ -65,14 +71,38 @@ def login():
                 return 'User exists'
                 #return render_template(('person.html'))
         except TypeError as error:
-            return render_template(('register.html'))
-
-
+            return render_template('register.html')
 
 
 @app.route('/register', methods=["GET", "POST"])
+# mehrere Telefon nummer nicht implementiert
 def register():
     return render_template(('register.html'))
+
+@app.route('/addPerson', methods=["POST"])
+# mehrere Telefon nummer nicht implementiert
+def register():
+    SvNr = request.form['SvNr']
+    Vorname = request.form["Vorname"]
+    PLZ = request.form["PLZ"]
+    Ort = request.form["Ort"]
+    Straße = request.form["Straße"]
+    HausNr = request.form["HausNr"]
+    TelefonNr = request.form["TelefonNr"]
+
+    # test if SvNr is already in DB
+
+    try:
+        connection = sqlite3.connect('DatabaseVersion0.db')
+        curs = connection.cursor()
+        curs.execute('''INSERT INTO Person IF NOT EXISTS VALUES('9876543210', 'Insert', 'Person', '2000', 'Wels', 'Zoostraße', '20', '5555')''')
+        curs.commit()
+        curs.close()
+        connection.close()
+        return render_template('addPerson.html')
+    except sqlite3.IntegrityError as error:
+        return 'Data does already exist'
+
 
 
 
