@@ -42,42 +42,33 @@ app.secret_key = os.urandom(24) # secret_key later used in session setup
 
 @app.route('/home')
 def home():
-    return render_template(('home.html'))
+    return render_template('home.html')
 
 @app.route('/login', methods=["POST"])
 def login():
     if request.method == "POST":
-        SvNr = request.form['SvNr']
-
         try:
-            ## Error: TypeError: View function did not have valid response
-            connection = sqlite3.connect('DatabaseVersion0.db')
-            curs = connection.cursor()
-            curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,) )
-            SvNr_SQL = curs.fetchone()[0]
-            print(SvNr_SQL)
+            SvNr = request.form['SvNr']
             print(SvNr)
-            connection.commit()
-            connection.close()
-            if SvNr == SvNr_SQL:
-                session['SvNr'] = SvNr
-                return 'User exists'
-        except TypeError as error:
-            print(error)
+            with sqlite3.connect("DatabaseVersion0.db") as connection:
+                curs = connection.cursor()
+                curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,) )
+                SvNr_SQL = curs.fetchone()[0]
+                print(SvNr_SQL)
+                if int(SvNr) == int(SvNr_SQL):
+                    session['SvNr'] = SvNr
+                    return render_template('login.html')
+        except:
             return render_template('register.html')
-    else:
-        return '<h1>get method was used this is not save! </h1>'
+        finally:
+            connection.close()
 
 
 
 @app.route('/register', methods=["POST"])
 # mehrere Telefon nummer nicht implementiert
 def register():
-    try:
         return render_template(('register.html'))
-    except:
-        return '<h1>get method was used this is not save! </h1>'
-
 
 @app.route('/addPerson', methods=["POST"])
 # mehrere Telefon nummer nicht implementiert
@@ -107,9 +98,6 @@ def addPerson():
             return render_template(('home.html'))
         finally:
             connection.close()
-    #else:
-        # return '<h1>get method was used tis is not save! </h1>'
-
 
 
 @app.route('/userEnvironment')
