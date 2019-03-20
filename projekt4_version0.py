@@ -25,12 +25,17 @@ def login():
                 curs = connection.cursor()
                 curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,) )
                 SvNr_SQL = curs.fetchone()[0]
-                print(SvNr_SQL)
+
+                curs.execute('SELECT distinct Abfahrtshafen FROM Passage')
+                Abfahrtshafen = curs.fetchall()
+                # Idee wäre hier folgendes:
+                # In drop down format bringen
+                # nach selection aus drop down cookie setzten und zusammen mit session weiter übergeben
                 if int(SvNr) == int(SvNr_SQL):
                     session['SvNr'] = SvNr
-                    return render_template('login.html')
-        except:
-            return render_template('register.html')
+                    return render_template('login.html', Abfahrtshafen=Abfahrtshafen)
+        #except:
+            #return render_template('register.html')
         finally:
             connection.close()
 
@@ -70,12 +75,18 @@ def addPerson():
         finally:
             connection.close()
 
+@app.route('/selectDeparture', methods=["POST"])
+def selectDeparture():
+    if g.SvNr:
+        return render_template('dummyTemplate.html')
+    return 'Not logged in'
+
+# Basic setup if you want to check if session is active and only tehn do sth.
 @app.route('/login_p', methods=["POST"])
 def login_p():
     if g.SvNr:
         return render_template('dummyTemplate.html')
     return 'Not logged in'
-
 
 
 # before request
