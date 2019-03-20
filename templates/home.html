@@ -6,15 +6,13 @@
 </head>
 <body>
     <h1> Welcome to White Star Line </h1>
-    <h2> What do you want to do? </h2> 
-	 <form action = "/register" method="POST" >
-        <!-- submit button with value register-->
-	<input type="submit" value="Register">
+    <h2> What do you want to do? </h2>
+	<form action = "/login" method="POST" >
+		<input type="text" name = "SvNr" >
+		<input type="submit" value="Login">
+    </form>
+	<form action = "/register" method="POST" >
+		<input type="submit" value="Register">
 	</form>
-    	<form action = "/login" method = "POST">
-	<!-- submit button + text input fild-->
-	<input type ="text" name = "SvNr">
-	<input type="submit" value="Login">
-    </form>	
 </body>
 </html>
