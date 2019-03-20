@@ -38,8 +38,6 @@ connection.commit()
 curs.close()
 connection.close()
 #####################################################################################################################
-# insert into person table by filling out html form
-
 
 # Flask constructior: define application as Flask object
 app = Flask(__name__)
@@ -51,7 +49,7 @@ app.secret_key = os.urandom(24)
 def home():
     return render_template(('home.html'))
 
-@app.route('/login', methods=["GET", "POST"])
+@app.route('/login', methods=["POST"])
 def login():
     if request.method == "POST":
         SvNr = request.form['SvNr']
@@ -71,38 +69,52 @@ def login():
                 return 'User exists'
                 #return render_template(('person.html'))
         except TypeError as error:
+            print(error)
             return render_template('register.html')
+    else:
+        return '<h1>get method was used this is not save! </h1>'
 
 
-@app.route('/register', methods=["GET", "POST"])
+
+@app.route('/register', methods=["POST", "GET"])
 # mehrere Telefon nummer nicht implementiert
 def register():
-    return render_template(('register.html'))
+    try:
+        return render_template(('register.html'))
+    except:
+        return '<h1>get method was used this is not save! </h1>'
+
 
 @app.route('/addPerson', methods=["POST"])
 # mehrere Telefon nummer nicht implementiert
-def register():
-    SvNr = request.form['SvNr']
-    Vorname = request.form["Vorname"]
-    PLZ = request.form["PLZ"]
-    Ort = request.form["Ort"]
-    Straße = request.form["Straße"]
-    HausNr = request.form["HausNr"]
-    TelefonNr = request.form["TelefonNr"]
+def addPerson():
+    if request.method == "POST":
+        SvNr = request.form['SvNr']
+        Vorname = request.form["Vorname"]
+        PLZ = request.form["PLZ"]
+        Ort = request.form["Ort"]
+        Straße = request.form["Straße"]
+        HausNr = request.form["HausNr"]
+        TelefonNr = request.form["TelefonNr"]
 
-    # test if SvNr is already in DB
+        try:
+            connection = sqlite3.connect('DatabaseVersion0.db')
+            curs = connection.cursor()
+            curs.execute("INSERT INTO Person ('SvNr', 'Vorname', 'Nachname', 'PLZ', 'Ort', 'Straße', 'HausNr', 'TelefonNr') VALUES (?,?,?,?,?,?,?,?)")
+            curs.commit()
+            curs.close()
 
-    try:
-        connection = sqlite3.connect('DatabaseVersion0.db')
-        curs = connection.cursor()
-        curs.execute('''INSERT INTO Person IF NOT EXISTS VALUES('9876543210', 'Insert', 'Person', '2000', 'Wels', 'Zoostraße', '20', '5555')''')
-        curs.commit()
-        curs.close()
-        connection.close()
-        return render_template('addPerson.html')
-    except sqlite3.IntegrityError as error:
-        return 'Data does already exist'
+            return render_template(('addPerson.html'))
 
+        except sqlite3.IntegrityError as error:
+            connection.rollback()
+            return render_template(('home.html'))
+        finally:
+            connection.close()
+            #return 'Reached finally'
+            return render_template(('addPerson.html', ))
+    else:
+        return '<h1>get method was used tis is not save! </h1>'
 
 
 
