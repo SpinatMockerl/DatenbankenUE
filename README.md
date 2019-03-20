@@ -47,3 +47,14 @@ Abfragen möglich.
 
 
 >>>>>>> master
+
+
+##################################################################
+Notes SQLITE3 & Flask in Python
+- insert dynamic variables in DB:
+	connection = sqlite2.connect('YourDB.db')
+	cursor = connection.cursor()
+	cursor.execute("INSERT INTO table(columnName1, columnName2) VALUES(?,?)", (yourVariable1, yourVariable2))
+	connection.commit()
+	cursor.close()
+	connection.close()
