@@ -15,20 +15,20 @@ Gorki, Kriz, Lehner, Mock
 # Git FAQ:
 
 ## branches von anderen lokal herunterladen:
-- git fetch				# lädt alle branches herunter
-- git branch --all			# zeigt alle branches an
-- git checkout <branch-von-anderen>	# branch wird ab jetzt auch nur mit $ git branch angezeigt
+- git fetch                             # lädt alle branches herunter
+- git branch --all                      # zeigt alle branches an
+- git checkout *branch-von-anderen*     # branch wird ab jetzt auch nur mit $ git branch angezeigt
 
 ## sicheres pushen in master:
 - git checkout master
-- git merge <branch-der-in-master-soll>
+- git merge *branch-der-in-master-soll*
 - git push
 
 ## Verwerfen von abgeschlossenen commits (rollback):
-- git checkout <branch-zu-resetten>
+- git checkout *branch-zu-resetten*
 - git log
-- git reset --hard <commit-hash>		# den hash aus log eingeben, zu dem man zurückkehren möchte
-- git push -f				# (force) push wird erzwungen und commit wird neuer HEAD
+- git reset --hard *commit-hash*        # den hash aus log eingeben, zu dem man zurückkehren möchte
+- git push -f                           # (force) push wird erzwungen und commit wird neuer HEAD
 
 ## neue files, die in allen branches sind:
 ist nur etwas, was mich am Anfang sehr verwirrt hat. Wenn man neue files erstellt und diese nicht addet, oder committed,
