@@ -78,24 +78,6 @@ def register():
     except:
         return '<h1>get method was used this is not save! </h1>'
 
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-@app.route('/insertPerson')
-# access page: http://localhost:5000/insertPerson
-def newPerson():
-    return render_template('templates/person.html')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-# env FLASK_APP=hello.py flask run
-=======
-@app.route('/register', methods=["GET", "POST"])
-def register():
-    return render_template(('register.html'))
-=======
 @app.route('/addPerson', methods=["POST"])
 # mehrere Telefon nummer nicht implementiert
 def addPerson():
@@ -109,7 +91,6 @@ def addPerson():
         print(Strasse)
         HausNr = request.form["HausNr"]
         TelefonNr = request.form["TelefonNr"]
->>>>>>> workingstation-eva
 
         try:
             connection = sqlite3.connect('DatabaseVersion0.db')
@@ -128,16 +109,7 @@ def addPerson():
     #else:
         # return '<h1>get method was used tis is not save! </h1>'
 
-
-
-@app.route('/userEnvironment')
-def userEnvironment():
-    identification = request.cookies.get('SvNr')
-    return '<h1>welcome ' + identification + '</h1>'
-
-
 if __name__ == '__main__':
     # Flask .run() function: runs application on local developent server
     # debug = True will autoatically update site when code changes
     app.run(debug = True)
->>>>>>> workingstation-eva
