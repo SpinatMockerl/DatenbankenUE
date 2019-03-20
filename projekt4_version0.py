@@ -61,21 +61,20 @@ def login():
             connection.commit()
             connection.close()
             if SvNr == SvNr_SQL:
-                session['SvNr'] = request.form['SvNr']
-                #return 'User exists'
-                return render_template(('person.html'))
+                session['SvNr'] = SvNr
+                return 'User exists'
+                #return render_template(('person.html'))
         except TypeError as error:
-            return 'please create user'
+            return render_template(('register.html'))
 
 
-
-        #response.set_cookie('SvNr', SvNr)
-        #response = make_response(render_template('login.html'))
 
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
     return render_template(('register.html'))
+
+
 
 @app.route('/userEnvironment')
 def userEnvironment():
