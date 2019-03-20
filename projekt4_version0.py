@@ -2,39 +2,9 @@
 # coding: utf8
 
 import sqlite3
-from flask import Flask, render_template, make_response, request, session, redirect
+from flask import Flask, render_template, make_response, request, session, redirect, g
 import os
 
-# Tutorial: https://www.youtube.com/watch?v=o-vsdfCBpsU
-
-# define connection, sqlite will create db file if not already there
-connection = sqlite3.connect('DatabaseVersion0.db')
-
-# define cursor
-curs = connection.cursor()
-
-# Create Tables
-# enter sql statements in doc string format
-curs.execute('''CREATE TABLE IF NOT EXISTS 
-    Person(SVNr int(10), Vorname varchar(10), 
-    Nachname varchar(10), PLZ int, Ort varchar(10), 
-    Strasse varchar(50), HausNr int(3), TelefonNr int, PRIMARY KEY (SVNr))''')
-
-curs.execute('''CREATE TABLE IF NOT EXISTS Telefonnummer( SVNr int(10), Telefon_nr int(12), \
-    PRIMARY KEY (SVNr, Telefon_nr), FOREIGN KEY (SVNr) REFERENCES Personen(SVNr))''')
-
-# insert data (if it does not exist)
-try:
-    curs.execute('''INSERT INTO Person VALUES('1234567890', 'Laura', 'Lama', '2020', 'Wien', 'Zoostrasse', '20', '5555')''')
-except sqlite3.IntegrityError as error:
-    print(error)
-    print('Data does already exist')
-# commit new stuff
-connection.commit()
-
-# close stuff
-curs.close()
-connection.close()
 
 # Flask constructior: define application as Flask object
 app = Flask(__name__)
@@ -47,10 +17,11 @@ def home():
 @app.route('/login', methods=["POST"])
 def login():
     if request.method == "POST":
+        session.pop('SvNr', None)
         try:
             SvNr = request.form['SvNr']
             print(SvNr)
-            with sqlite3.connect("DatabaseVersion0.db") as connection:
+            with sqlite3.connect("first.db") as connection:
                 curs = connection.cursor()
                 curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,) )
                 SvNr_SQL = curs.fetchone()[0]
@@ -82,12 +53,12 @@ def addPerson():
         Strasse = request.form["Strasse"]
         print(Strasse)
         HausNr = request.form["HausNr"]
-        TelefonNr = request.form["TelefonNr"]
+        #TelefonNr = request.form["TelefonNr"]
 
         try:
-            connection = sqlite3.connect('DatabaseVersion0.db')
+            connection = sqlite3.connect('first.db')
             curs = connection.cursor()
-            curs.execute("INSERT INTO PERSON (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr, TelefonNr) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr, TelefonNr))
+            curs.execute("INSERT INTO PERSON (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr) VALUES (?, ?, ?, ?, ?, ?, ?)", (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr))
             connection.commit()
             curs.close()
 
@@ -99,11 +70,26 @@ def addPerson():
         finally:
             connection.close()
 
+@app.route('/login_p', methods=["POST"])
+def login_p():
+    if g.SvNr:
+        return render_template('dummyTemplate.html')
+    return 'Not logged in'
 
-@app.route('/userEnvironment')
-def userEnvironment():
-    identification = request.cookies.get('SvNr')
-    return '<h1>welcome ' + identification + '</h1>'
+
+
+# before request
+@app.before_request
+def before_request():
+    g.SvNr = None
+    if 'SvNr' in session:
+        g.SvNr = session['SvNr']
+# teardown in case something goes wrong
+
+@app.route('/logout', methods=["POST"])
+def logout():
+    session.pop('SvNr', None)
+    return "Logout was successful"
 
 
 if __name__ == '__main__':
