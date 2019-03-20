@@ -54,4 +54,11 @@ Abfragen möglich.
 	cursor.close()  
 	connection.close()  
 
+# To Do im setup von Webpage:
+- "Kosmetisch":
+	nach Registrierung wird man auf Login weitergeleitet ohne informationen darüber zu erhalten ob registrierung korrekt war.	
+
+- Kritisch:
+	Login: Setup mit Zustandserhaltung, weiterverarbeitung von Daten und sicherheit (?)   
+
 >>>>>>> master
