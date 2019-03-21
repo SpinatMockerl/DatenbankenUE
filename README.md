@@ -11,6 +11,11 @@ Gorki, Kriz, Lehner, Mock
 - Buchen: Key aus passagiernummer und passagennummer
 - Entlehner: Trigger für union aus Techniker und Kapitäne
 
+## html:
+- check if registration form is empty
+- on registration or login, return same html (register, home) with additional text "invalid number..."?
+- add passage.html
+- add buchungszeit.html
 
 # Git FAQ:
 
