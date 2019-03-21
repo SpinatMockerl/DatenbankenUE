@@ -60,5 +60,3 @@ Abfragen möglich.
 
 - Kritisch:
 	Login: Setup mit Zustandserhaltung, weiterverarbeitung von Daten und sicherheit (?)   
-
->>>>>>> master
