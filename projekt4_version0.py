@@ -25,7 +25,7 @@ curs.execute('''CREATE TABLE IF NOT EXISTS Telefonnummer( SVNr int(10), Telefon_
 
 # insert data (if it does not exist)
 try:
-    curs.execute('''INSERT INTO Person VALUES('1234567890', 'Laura', 'Lama', '2020', 'Wien', 'Zoostrasse', '20', '5555')''')
+    curs.execute("INSERT INTO Person VALUES('1234567890', 'Laura', 'Lama', '2020', 'Wien', 'Zoostrasse', '20', '5555')")
 except sqlite3.IntegrityError as error:
     print(error)
     print('Data does already exist')
@@ -36,32 +36,41 @@ connection.commit()
 curs.close()
 connection.close()
 
-# Flask constructior: define application as Flask object
+# Flask constructor: define application as Flask object
 app = Flask(__name__)
-app.secret_key = os.urandom(24) # secret_key later used in session setup
+app.secret_key = os.urandom(24)     # secret_key later used in session setup
+
 
 @app.route('/home')
 def home():
-    return render_template(('home.html'))
+    return render_template('home.html')
+
+
+@app.route('/returnHome', methods=["POST"])
+def returnHome():
+    return render_template('home.html')
+
 
 @app.route('/login', methods=["POST"])
 def login():
     if request.method == "POST":
-        SvNr = request.form['SvNr']
+        SvNr = int(request.form['SvNr'])
 
         try:
-            ## Error: TypeError: View function did not have valid response
+            # Error: TypeError: View function did not have valid response
             connection = sqlite3.connect('DatabaseVersion0.db')
             curs = connection.cursor()
-            curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,) )
-            SvNr_SQL = curs.fetchone()[0]
+            curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,))
+            SvNr_SQL = int(curs.fetchone()[0])
             print(SvNr_SQL)
             print(SvNr)
             connection.commit()
             connection.close()
             if SvNr == SvNr_SQL:
                 session['SvNr'] = SvNr
-                return 'User exists'
+                return render_template('login.html')
+            else:
+                return 'User does not exist'
         except TypeError as error:
             print(error)
             return render_template('register.html')
@@ -69,14 +78,14 @@ def login():
         return '<h1>get method was used this is not save! </h1>'
 
 
-
 @app.route('/register', methods=["POST"])
 # mehrere Telefon nummer nicht implementiert
 def register():
     try:
-        return render_template(('register.html'))
+        return render_template('register.html')
     except:
         return '<h1>get method was used this is not save! </h1>'
+
 
 @app.route('/addPerson', methods=["POST"])
 # mehrere Telefon nummer nicht implementiert
@@ -95,21 +104,24 @@ def addPerson():
         try:
             connection = sqlite3.connect('DatabaseVersion0.db')
             curs = connection.cursor()
-            curs.execute("INSERT INTO PERSON (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr, TelefonNr) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr, TelefonNr))
+            curs.execute("INSERT INTO PERSON (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr, TelefonNr) VALUES "
+                         "(?, ?, ?, ?, ?, ?, ?, ?)", (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr, TelefonNr))
             connection.commit()
             curs.close()
-
-            return render_template(('home.html'))
+            print("Person was added to db")
+            return render_template('addPerson.html')
 
         except sqlite3.IntegrityError as error:
             connection.rollback()
-            return render_template(('home.html'))
+            print("Person was not added to db")
+            return render_template('userExists.html')
         finally:
             connection.close()
-    #else:
+    # else:
         # return '<h1>get method was used tis is not save! </h1>'
 
+
 if __name__ == '__main__':
-    # Flask .run() function: runs application on local developent server
-    # debug = True will autoatically update site when code changes
-    app.run(debug = True)
+    # Flask .run() function: runs application on local development server
+    # debug = True will automatically update site when code changes
+    app.run(debug=True)
