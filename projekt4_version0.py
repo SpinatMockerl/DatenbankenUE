@@ -176,6 +176,42 @@ def inputPassageTime():
             connection.close()
 
 
+@app.route('/delete', methods=["POST"])
+def delete():
+    return render_template('delete.html')
+
+
+@app.route('/deleteEntry', methods=["POST"])
+def deleteEntry():
+    if request.method == "POST":
+        table = request.form["table"]
+        Pkey = ""
+        entry = request.form["entry"]
+        if table == "PERSON":
+            Pkey = "SVNr"
+        elif table == "PASSAGE":
+            Pkey = "Passagennumer"
+        elif table == "BUCHUNG":
+            Pkey = "Buchungsnummer"
+        print(table + "\n" + Pkey + "\n" + entry)
+        try:
+            connection = sqlite3.connect('first.db')
+            curs = connection.cursor()
+            # Injection risk
+            curs.execute("DELETE FROM {} WHERE {} =  {}".format(table, Pkey, entry))
+            connection.commit()
+            curs.close()
+            print("{} was removed from {}".format(entry, table))
+            return render_template('home.html')
+
+        except sqlite3.IntegrityError:
+            connection.rollback()
+            print("{} was not removed from {}".format(entry, table))
+            return render_template('home.html')
+        finally:
+            connection.close()
+
+
 if __name__ == '__main__':
     # Flask .run() function: runs application on local development server
     # debug = True will automatically update site when code changes
