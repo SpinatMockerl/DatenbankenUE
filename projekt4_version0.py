@@ -8,7 +8,7 @@ import os
 # Tutorial: https://www.youtube.com/watch?v=o-vsdfCBpsU
 
 # define connection, sqlite will create db file if not already there
-connection = sqlite3.connect('DatabaseVersion0.db')
+connection = sqlite3.connect('first.db')
 
 # define cursor
 curs = connection.cursor()
@@ -24,8 +24,9 @@ curs.execute('''CREATE TABLE IF NOT EXISTS Telefonnummer( SVNr int(10), Telefon_
     PRIMARY KEY (SVNr, Telefon_nr), FOREIGN KEY (SVNr) REFERENCES Personen(SVNr))''')
 
 # insert data (if it does not exist)
+# Telefonnummer nicht implementiert
 try:
-    curs.execute("INSERT INTO Person VALUES('1234567890', 'Laura', 'Lama', '2020', 'Wien', 'Zoostrasse', '20', '5555')")
+    curs.execute("INSERT INTO Person VALUES('1234567890', 'Laura', 'Lama', '2020', 'Wien', 'Zoostrasse', '20')")
 except sqlite3.IntegrityError as error:
     print(error)
     print('Data does already exist')
@@ -55,15 +56,13 @@ def returnHome():
 def login():
     if request.method == "POST":
         try:
-            SvNr = request.form['SvNr']
-            print(SvNr)
-            with sqlite3.connect("DatabaseVersion0.db") as connection:
+            SVNr = request.form['SVNr']
+            print(SVNr)
+            with sqlite3.connect("first.db") as connection:
                 curs = connection.cursor()
-                curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,) )
-                SvNr_SQL = curs.fetchone()[0]
-                print(SvNr_SQL)
-                if int(SvNr) == int(SvNr_SQL):
-                    session['SvNr'] = SvNr
+                curs.execute('SELECT SVNr FROM PERSON where SVNr = ?', (SVNr,))
+                if curs.fetchone()[0]:
+                    session['SVNr'] = SVNr
                     return render_template('login.html')
         except:
             return render_template('register.html')
@@ -81,30 +80,98 @@ def register():
 # mehrere Telefon nummer nicht implementiert
 def addPerson():
     if request.method == "POST":
-        SvNr = request.form['SvNr']
+        SVNr = request.form['SVNr']
         Vorname = request.form["Vorname"]
         Nachname = request.form["Nachname"]
         PLZ = request.form["PLZ"]
         Ort = request.form["Ort"]
         Strasse = request.form["Strasse"]
         print(Strasse)
-        HausNr = request.form["HausNr"]
+        Hausnr = request.form["HausNr"]
         TelefonNr = request.form["TelefonNr"]
 
         try:
-            connection = sqlite3.connect('DatabaseVersion0.db')
+            connection = sqlite3.connect('first.db')
             curs = connection.cursor()
-            curs.execute("INSERT INTO PERSON (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr, TelefonNr) VALUES "
-                         "(?, ?, ?, ?, ?, ?, ?, ?)", (SvNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr, TelefonNr))
+            curs.execute("INSERT INTO PERSON (SVNr, Vorname, Nachname, PLZ, Ort, Strasse, Hausnr) VALUES "
+                         "(?, ?, ?, ?, ?, ?, ?)", (SVNr, Vorname, Nachname, PLZ, Ort, Strasse, Hausnr))
             connection.commit()
             curs.close()
             print("Person was added to db")
             return render_template('addPerson.html')
 
-        except sqlite3.IntegrityError as error:
+        except sqlite3.IntegrityError:
             connection.rollback()
             print("Person was not added to db")
             return render_template('userExists.html')
+        finally:
+            connection.close()
+
+
+@app.route('/passage', methods=["POST"])
+def passage():
+    return render_template('passage.html')
+
+
+@app.route('/inputPassage', methods=["POST"])
+# mehrere Telefon nummer nicht implementiert
+def inputPassage():
+    if request.method == "POST":
+        Abfahrtshafen = request.form['Abfahrtshafen']
+        Zielhafen = request.form["Zielhafen"]
+        try:
+            connection = sqlite3.connect('first.db')
+            curs = connection.cursor()
+            curs.execute('SELECT Passagennummer FROM PASSAGE where Abfahrtshafen = ? and Zielhafen = ?',
+                         (Abfahrtshafen, Zielhafen))
+            try:
+                Passage_SQL = curs.fetchone()[0]
+                if Passage_SQL:
+                    print("Passage vorhanden")
+                    connection.commit()
+                    curs.close()
+                    # Platzhalter für Weitergabe von Variablen an nächste Seite und dort Zugriff auf SQL mit Buchungserstellung?
+
+                    return render_template('passageTime.html')
+
+            except:
+                connection.rollback()
+                print("Passage nicht vorhanden")
+                connection.commit()
+                curs.close()
+                print("Passagenabfrage durchgeführt")
+                return render_template('home.html')
+
+        except:
+            connection.rollback()
+            print("Passagenabfrage wurde nicht durchgeführt")
+            return render_template('home.html')
+        finally:
+            connection.close()
+
+
+@app.route('/inputPassageTime', methods=["POST"])
+# mehrere Telefon nummer nicht implementiert
+def inputPassageTime():
+    if request.method == "POST":
+        # Abfahrtszeit = request.form['Abfahrtszeit']
+        # Passagennummer =
+        try:
+            connection = sqlite3.connect('first.db')
+            curs = connection.cursor()
+            # Abfrage welche die nächste Buchungsnummer ist?
+            # Buchungsnummer =
+            # curs.execute("INSERT INTO BUCHEN (Buchungsnummer, SVNR Passagennummer) VALUES "
+            #              "(?, ?, ?)", (Buchungsnummer, SVNr, Passagennummer))
+            print("Buchung eingetragen")
+            connection.commit()
+            curs.close()
+            return render_template('bookingDone.html')
+
+        except:
+            connection.rollback()
+            print("Buchung nicht eingetragen")
+            return render_template('home.html')
         finally:
             connection.close()
 
