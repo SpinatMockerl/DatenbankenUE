@@ -227,47 +227,63 @@ def before_request():
 def addPassenger():
     if request.method == "POST":
         Ankunftszeit = request.cookies.get('Ankunftszeit', 0)
-        print('Ankunftszeit: ' + Ankunftszeit)
-        Ankunftshafen = request.cookies.get('Ankunftshafen', 0)
+
+        ### achtung namen vertauscht!!
+        Abfahrtshafen = request.cookies.get('Ankunftshafen', 0)
+        Ankunftshafen = request.cookies.get('Abfahrtshafen', 0)
         print('Ankunftshafen: ' + Ankunftshafen)
-        Abfahrtshafen = request.cookies.get('Abfahrtshafen', 0)
+        print('Ankunftszeit: ' + Ankunftszeit)
         print('Abfahrtshafen: ' + Abfahrtshafen)
 
         if 'SvNr' in session:
             SvNr = session['SvNr']
             print(SvNr)
 
-        # Passagennummer =
         try:
             with sqlite3.connect("first.db") as connection:
                 cursor = connection.cursor()
-                # richtige passage fürs buchen finden
                 cursor.execute('''select Passagennummer from Passage where Zielhafen LIKE ('%' || ? || '%') AND Abfahrtshafen LIKE ('%' || ? || '%') AND Ankunftszeit LIKE ('%' || ? || '%') ''',(Ankunftshafen, Abfahrtshafen, Ankunftszeit,))
-                Passagennummer = cursor.fetchone()
-                print('Passagenummer; ' + Passagennummer)
-        #except:
-            #connection.rollback()
+                selectedPassagennummer = cursor.fetchone()[0]
+                print(selectedPassagennummer)
+        ## zurück senden falls es zu fehler kommt
+        except:
+            connection.rollback()
         finally:
             connection.close()
-        #
-        try:
-            connection = sqlite3.connect('first.db')
-            curs = connection.cursor()
-            # Abfrage welche die nächste Buchungsnummer ist?
-            # Buchungsnummer =
-            # curs.execute("INSERT INTO BUCHEN (Buchungsnummer, SVNR Passagennummer) VALUES "
-            #              "(?, ?, ?)", (Buchungsnummer, SVNr, Passagennummer))
-            print("Buchung eingetragen")
-            connection.commit()
-            curs.close()
-            return render_template('bookingDone.html')
 
+        # neue buchungsnummer erstellen
+        try:
+            with sqlite3.connect('first.db') as connection:
+                cursor = connection.cursor()
+                # Abfrage welche die nächste Buchungsnummer ist?
+                cursor.execute("SELECT MAX(Buchungsnummer) FROM Buchen")
+                hoechsteBuchungsnummer = cursor.fetchone()[0]
+                print(hoechsteBuchungsnummer)
+                neueBuchungsnummer = int(hoechsteBuchungsnummer) + 1
+                print(neueBuchungsnummer)
+
+        # was wäre eine gute exception?
+        except:
+            print('something went wrong')
+        finally:
+            connection.close()
+
+        try:
+            with sqlite3.connect('first.db') as connection:
+                Klasse = '0'
+                curs = connection.cursor()
+                curs.execute("INSERT INTO BUCHEN (Buchungsnummer, SVNR, Passagennummer, Klasse) VALUES (?, ?, ?, ?)", (neueBuchungsnummer, SvNr, selectedPassagennummer, Klasse,))
+                print("Buchung eingetragen")
+                connection.commit()
+                curs.close()
+                return render_template('bookingDone.html')
         except:
             connection.rollback()
             print("Buchung nicht eingetragen")
             return render_template('home.html')
         finally:
             connection.close()
+
 
 
 @app.route('/delete', methods=["POST"])
