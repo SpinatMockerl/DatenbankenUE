@@ -9,19 +9,26 @@
 	<h1> This is the registration page </h1>
 	<h2> Please enter requested information </h2>
 		<h4> SvNr</h4>
-		<input type="text" name = "SVNr" required pattern="[0-9]{10}">
+		<input type="text" name = "SVNr" required pattern="[0-9]{10}"
+		title="Must be a number of exactly 10 digits">
 		<h4> Vorname</h4>
-		<input type="text" name = "Vorname" pattern="[A-Za-zÄÖÜäöü -]{1,20}">
+		<input type="text" name = "Vorname" pattern="[A-Za-zÄÖÜäöü -]{1,20}"
+		title="Can only include letters, spaces, dashes and Ä, Ö, Ü">
 		<h4> Nachname</h4>
-		<input type="text" name = "Nachname" pattern="[A-Za-zÄÖÜäöü -]{1,20}">
+		<input type="text" name = "Nachname" pattern="[A-Za-zÄÖÜäöü -]{1,20}"
+		title="Can only include letters, spaces, dashes and Ä, Ö, Ü">
 		<h4> PLZ </h4>
-		<input type="text" name = "PLZ" pattern="[0-9]{3,10}">
+		<input type="text" name = "PLZ" pattern="[0-9]{3,10}"
+		title="Must be a number of 3-10 digits">
 		<h4> Ort </h4>
-		<input type="text" name = "Ort" pattern="[A-Za-zÄÖÜäöü -]{1,20}">
+		<input type="text" name = "Ort" pattern="[A-Za-zÄÖÜäöü -]{1,20}"
+		title="Can only include letters, spaces, dashes and Ä, Ö, Ü">
 		<h4> Strasse </h4>
-		<input type="text" name = "Strasse" pattern="[A-Za-zÄÖÜäöü -]{1,20}">
+		<input type="text" name = "Strasse" pattern="[A-Za-zÄÖÜäöü -]{1,20}"
+		title="Can only include letters, spaces, dashes and Ä, Ö, Ü">
 		<h4> HausNr </h4>
-		<input type="text" name = "HausNr" pattern="[0-9]{1,5}">
+		<input type="text" name = "HausNr" pattern="[0-9]{1,5}"
+		title="Must be a number of 1-5 digits">
 		<!--
 		<h4> TelefonNr</h4>
 		<input type="text" name = "TelefonNr">
