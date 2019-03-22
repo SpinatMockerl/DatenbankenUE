@@ -8,7 +8,7 @@
     <h1> Welcome to White Star Line </h1>
     <h2> What do you want to do? </h2>
 	<form action = "/login" method="POST" >
-		<input type="text" name = "SvNr" required pattern="[0-9]{10}$">
+		<input type="text" name = "SvNr" required pattern="[0-9]{10}$" title="Must be a number of exactly 10 digits">
 		<input type="submit" value="Login">
     </form>
 	<form action = "/register" method="POST" >
