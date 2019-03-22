@@ -37,8 +37,10 @@ def login():
                 if curs.fetchone()[0]:
                     session['SvNr'] = SvNr
                     return render_template('login.html', Abfahrtshafen=Abfahrtshafen)
+                else:
+                    return render_template('register.html')
         except:
-            return render_template('register.html')
+            print("Error")
         finally:
             connection.close()
 
