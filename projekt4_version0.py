@@ -226,14 +226,13 @@ def before_request():
 # mehrere Telefon nummer nicht implementiert
 def addPassenger():
     if request.method == "POST":
-        Ankunftszeit = request.cookies.get('Ankunftszeit', 0)
+        departureTime = request.cookies.get('departureTime', 0)
 
-        ### achtung namen vertauscht!!
-        Abfahrtshafen = request.cookies.get('Ankunftshafen', 0)
-        Ankunftshafen = request.cookies.get('Abfahrtshafen', 0)
-        print('Ankunftshafen: ' + Ankunftshafen)
-        print('Ankunftszeit: ' + Ankunftszeit)
-        print('Abfahrtshafen: ' + Abfahrtshafen)
+        departure = request.cookies.get('departure', 0)
+        destination = request.cookies.get('destination', 0)
+        #print('Ankunftshafen: ' + Ankunftshafen)
+        #print('Ankunftszeit: ' + Ankunftszeit)
+        #print('Abfahrtshafen: ' + departure)
 
         if 'SvNr' in session:
             SvNr = session['SvNr']
@@ -242,7 +241,7 @@ def addPassenger():
         try:
             with sqlite3.connect("first.db") as connection:
                 cursor = connection.cursor()
-                cursor.execute('''select Passagennummer from Passage where Zielhafen LIKE ('%' || ? || '%') AND Abfahrtshafen LIKE ('%' || ? || '%') AND Ankunftszeit LIKE ('%' || ? || '%') ''',(Ankunftshafen, Abfahrtshafen, Ankunftszeit,))
+                cursor.execute('''select Passagennummer from Passage where Zielhafen LIKE ('%' || ? || '%') AND Abfahrtshafen LIKE ('%' || ? || '%') AND Abfahrtszeit LIKE ('%' || ? || '%') ''',(destination, departure, departureTime,))
                 selectedPassagennummer = cursor.fetchone()[0]
                 print(selectedPassagennummer)
         ## zurück senden falls es zu fehler kommt
