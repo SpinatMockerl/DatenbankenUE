@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Page to select arrival time. </title>
+</head>
+<body>
+    <h1> Please select arrival time </h1>
+    {% for time in arrivalTime %}
+        <p>{{time[0]}}</p>
+        {% endfor %}
+    <form action = "/confirmBooking" method="POST" >
+        <input type="text" name = "Ankunftszeit">
+        <input type="submit" value = "Ankunftszeit">
+</body>
+</html>

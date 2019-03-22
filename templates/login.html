@@ -1,16 +1,26 @@
 <!DOCTYPE html>
-<!--<html lang="en"> -->
+<html lang="en">
+<head>
+</head>
 	<body>
 	<form action = "/returnHome" method="POST" >
 		<input type="submit" value="Home">
 	</form>
 		<h1> User does exist, no pw protection </h1>
-		<!--
-		<form action = "/userEnvironment" method ="POST">
-		</form> -->
-	<form action = "/passage" method="POST" >
-		<input type="submit" value="Buchen">
-	</form>
-
+        <hr/>
+        <p>
+            Please type in your destination port
+        </p>
+            {% for Hafen in Abfahrtshafen %}
+            <!-- fetchall retuns tuple of tuple, therefore indexing necessary-->
+            <p>{{Hafen[0]}}</p>
+            {% endfor %}
+        <form action = "/selectDeparture" method="POST" >
+            <input type="text" name = "Hafen">
+            <input type="submit" value = "Destination">
+        </form>
+        <form action = "/logout" method="POST" >
+			<input type="submit" value="Logout">
+    	</form>
 	</body>
 </html>

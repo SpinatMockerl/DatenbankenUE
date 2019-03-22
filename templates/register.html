@@ -9,21 +9,23 @@
 	<h1> This is the registration page </h1>
 	<h2> Please enter requested information </h2>
 		<h4> SvNr</h4>
-		<input type="text" name = "SVNr" >
+		<input type="text" name = "SVNr" required pattern="[0-9]{10}">
 		<h4> Vorname</h4>
-		<input type="text" name = "Vorname">
+		<input type="text" name = "Vorname" pattern="[A-Za-zÄÖÜäöü -]{1,20}">
 		<h4> Nachname</h4>
-		<input type="text" name = "Nachname">
+		<input type="text" name = "Nachname" pattern="[A-Za-zÄÖÜäöü -]{1,20}">
 		<h4> PLZ </h4>
-		<input type="text" name = "PLZ">
+		<input type="text" name = "PLZ" pattern="[0-9]{3,10}">
 		<h4> Ort </h4>
-		<input type="text" name = "Ort">
+		<input type="text" name = "Ort" pattern="[A-Za-zÄÖÜäöü -]{1,20}">
 		<h4> Strasse </h4>
-		<input type="text" name = "Strasse">
+		<input type="text" name = "Strasse" pattern="[A-Za-zÄÖÜäöü -]{1,20}">
 		<h4> HausNr </h4>
-		<input type="text" name = "HausNr">
+		<input type="text" name = "HausNr" pattern="[0-9]{1,5}">
+		<!--
 		<h4> TelefonNr</h4>
 		<input type="text" name = "TelefonNr">
+		-->
 		<input type="submit" value = "submit">
 		<!-- submit -->
 	</form>
