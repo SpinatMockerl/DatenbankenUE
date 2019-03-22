@@ -6,7 +6,6 @@ from flask import Flask, render_template, make_response, request, session, redir
 import os
 
 
-
 # Flask constructor: define application as Flask object
 app = Flask(__name__)
 app.secret_key = os.urandom(24)     # secret_key later used in session setup
@@ -187,48 +186,46 @@ def confirmBooking():
         return response
 
 
-@app.route('/addPassenger', methods=["POST"])
-def addPassenger():
-    if g.SvNr:
-        Ankunftszeit = request.cookies.get('Ankunftszeit', 0)
-        Abfahrtshafen = request.cookies.get('Abfahrtshafen', 0)
-        print(Abfahrtshafen)
-        Ankunftshafen = request.cookies.get('Ankunftshafen', 0)
-        print(Ankunftshafen)
-        if 'SvNr' in session:
-            SvNr = session['SvNr']
-            print(SvNr)
-
-
-        try:
-            connection = sqlite3.connect('first.db')
-            cursor = connection.cursor()
-
-            # richtige passage fürs buchen finden
-            cursor.execute('''select Passagennummer from Passage where Zielhafen LIKE ('%' || ? || '%') 
-                    AND Abfahrtshafen LIKE ('%' || ? || '%') AND Ankunftszeit LIKE ('%' || ? || '%') ''', (Ankunftshafen, Abfahrtshafen, Ankunftszeit,))
-            Passagennummer = cursor.fetchone()[0]
-            print(Passagennummer)
-
-            # Passagier erstellen
-            cursor.execute('SELECT MAX(Passagiernummer) from Passagier')
-            hochstePassagierNr = cursor.fetchone()[0]
-            if hochstePassagierNr == None:
-                PassagierNrNeu = 1
-            else:
-                PassagierNrNeu = hochstePassagierNr + 1
-            print(PassagierNrNeu)
-
-            #buchung 
-
-
-
-            # buchen
-
-            return render_template('dummyTemplate.html')
-        finally:
-            connection.close()
-    return 'Not logged in'
+# @app.route('/addPassenger', methods=["POST"])
+# def addPassenger():
+#     if g.SvNr:
+#         Ankunftszeit = request.cookies.get('Ankunftszeit', 0)
+#         Abfahrtshafen = request.cookies.get('Abfahrtshafen', 0)
+#         print(Abfahrtshafen)
+#         Ankunftshafen = request.cookies.get('Ankunftshafen', 0)
+#         print(Ankunftshafen)
+#         if 'SvNr' in session:
+#             SvNr = session['SvNr']
+#             print(SvNr)
+#
+#         try:
+#             connection = sqlite3.connect('first.db')
+#             cursor = connection.cursor()
+#
+#             # richtige passage fürs buchen finden
+#             cursor.execute('''select Passagennummer from Passage where Zielhafen LIKE ('%' || ? || '%')
+#                     AND Abfahrtshafen LIKE ('%' || ? || '%') AND Ankunftszeit LIKE ('%' || ? || '%') ''',
+#                            (Ankunftshafen, Abfahrtshafen, Ankunftszeit,))
+#             Passagennummer = cursor.fetchone()[0]
+#             print(Passagennummer)
+#
+#             # Passagier erstellen
+#             cursor.execute('SELECT MAX(Passagiernummer) from Passagier')
+#             hochstePassagierNr = cursor.fetchone()[0]
+#             if hochstePassagierNr == None:
+#                 PassagierNrNeu = 1
+#             else:
+#                 PassagierNrNeu = hochstePassagierNr + 1
+#             print(PassagierNrNeu)
+#
+#             # buchung
+#
+#             # buchen
+#
+#             return render_template('dummyTemplate.html')
+#         finally:
+#             connection.close()
+#     return 'Not logged in'
 
 
 # Basic setup if you want to check if session is active and only tehn do sth.
@@ -249,12 +246,34 @@ def before_request():
 # teardown in case something goes wrong
 
 
-@app.route('/inputPassageTime', methods=["POST"])
+@app.route('/addPassenger', methods=["POST"])
 # mehrere Telefon nummer nicht implementiert
-def inputPassageTime():
+def addPassenger():
     if request.method == "POST":
-        # Abfahrtszeit = request.form['Abfahrtszeit']
+        Ankunftszeit = request.cookies.get('Ankunftszeit', 0)
+        print('Ankunftszeit: ' + Ankunftszeit)
+        Ankunftshafen = request.cookies.get('Ankunftshafen', 0)
+        print('Ankunftshafen: ' + Ankunftshafen)
+        Abfahrtshafen = request.cookies.get('Abfahrtshafen', 0)
+        print('Abfahrtshafen: ' + Abfahrtshafen)
+
+        if 'SvNr' in session:
+            SvNr = session['SvNr']
+            print(SvNr)
+
         # Passagennummer =
+        try:
+            with sqlite3.connect("first.db") as connection:
+                cursor = connection.cursor()
+                # richtige passage fürs buchen finden
+                cursor.execute('''select Passagennummer from Passage where Zielhafen LIKE ('%' || ? || '%') AND Abfahrtshafen LIKE ('%' || ? || '%') AND Ankunftszeit LIKE ('%' || ? || '%') ''',(Ankunftshafen, Abfahrtshafen, Ankunftszeit,))
+                Passagennummer = cursor.fetchone()
+                print('Passagenummer; ' + Passagennummer)
+        #except:
+            #connection.rollback()
+        finally:
+            connection.close()
+        #
         try:
             connection = sqlite3.connect('first.db')
             curs = connection.cursor()
