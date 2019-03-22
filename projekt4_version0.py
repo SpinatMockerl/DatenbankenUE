@@ -32,15 +32,15 @@ def login():
             with sqlite3.connect("first.db") as connection:
                 curs = connection.cursor()
                 curs.execute('SELECT distinct Abfahrtshafen FROM Passage')
-                Abfahrtshafen = curs.fetchall
+                Abfahrtshafen = curs.fetchall()
                 curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,))
                 if curs.fetchone()[0]:
                     session['SvNr'] = SvNr
-                    return render_template('login.html', Abfahrtshafen=Abfahrtshafen)
-                else:
-                    return render_template('register.html')
+                    print("bis hier")
+                    print(Abfahrtshafen)
+                    return render_template(('login.html'), Abfahrtshafen=Abfahrtshafen)
         except:
-            print("Error")
+            return render_template('register.html')
         finally:
             connection.close()
 
@@ -65,7 +65,7 @@ def addPerson():
             connection = sqlite3.connect('first.db')
             curs = connection.cursor()
             curs.execute("INSERT INTO PERSON (SVNr, Vorname, Nachname, PLZ, Ort, Strasse, Hausnr) VALUES "
-                         "(?, ?, ?, ?, ?, ?, ?)", (SVNr, Vorname, Nachname, PLZ, Ort, Strasse, Hausnr))
+                         "(?, ?, ?, ?, ?, ?, ?)", (SVNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr))
             connection.commit()
             curs.close()
             print("Person was added to db")
