@@ -5,10 +5,14 @@
     <title> Page to select arrival port. </title>
 </head>
 <body>
+    <form action = "/logout" method="POST" >
+        <input type="submit" value="Logout">
+    </form>
     <p>Please type in your departureFrom port</p>
         {% for Hafen in departureFrom %}
-        <p>{{Hafen}}</p>
+        <p>{{Hafen[0]}}</p>
         {% endfor %}
+    <p>{{Error}}</p>
     <form action = "/selectArrivalTime" method="POST" >
         <input type="text" name = "Hafen">
         <input type="submit" value = "Origin Port">

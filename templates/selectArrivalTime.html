@@ -5,10 +5,14 @@
     <title> Page to select arrival time. </title>
 </head>
 <body>
+    <form action = "/logout" method="POST" >
+        <input type="submit" value="Logout">
+    </form>
     <h1> Please select arrival time </h1>
     {% for time in arrivalTime %}
         <p>{{time[0]}}</p>
         {% endfor %}
+    <p>{{Error}}</p>
     <form action = "/confirmBooking" method="POST" >
         <input type="text" name = "Ankunftszeit">
         <input type="submit" value = "Ankunftszeit">
