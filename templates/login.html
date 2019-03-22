@@ -9,7 +9,7 @@
     <h1> User does exist, no pw protection </h1>
     <hr/>
     <p>
-        Please type in your destination port
+        Please type in your Departure port
     </p>
         {% for Hafen in Abfahrtshafen %}
         <!-- fetchall retuns tuple of tuple, therefore indexing necessary-->
@@ -18,7 +18,7 @@
     <p>{{Error}}</p>
     <form action = "/selectDeparture" method="POST" >
         <input type="text" name = "Hafen">
-        <input type="submit" value = "Destination">
+        <input type="submit" value = "submit">
     </form>
 
 	</body>

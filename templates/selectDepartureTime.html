@@ -8,13 +8,14 @@
     <form action = "/logout" method="POST" >
         <input type="submit" value="Logout">
     </form>
-    <h1> Please select arrival time </h1>
-    {% for time in arrivalTime %}
+    <h1> Please select Departure time </h1>
+    {% for time in departureTime %}
         <p>{{time[0]}}</p>
         {% endfor %}
     <p>{{Error}}</p>
     <form action = "/confirmBooking" method="POST" >
-        <input type="text" name = "Ankunftszeit">
-        <input type="submit" value = "Ankunftszeit">
+        <input type="text" name = "departureTime">
+        <input type="submit" value = "Departure Time">
+    </form>
 </body>
 </html>

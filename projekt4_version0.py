@@ -20,30 +20,6 @@ def home():
 def returnHome():
     return render_template('home.html')
 
-
-@app.route('/login', methods=["POST"])
-# To Do: enable get and redirect to home
-def login():
-    if request.method == "POST":
-        session.pop('SvNr', None)
-        try:
-            SvNr = request.form['SvNr']
-            with sqlite3.connect("first.db") as connection:
-                curs = connection.cursor()
-                curs.execute('SELECT distinct Abfahrtshafen FROM Passage')
-                Abfahrtshafen = curs.fetchall()
-                curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,))
-                if curs.fetchone()[0]:
-                    session['SvNr'] = SvNr
-                    print("bis hier")
-                    print(Abfahrtshafen)
-                    return render_template(('login.html'), Abfahrtshafen=Abfahrtshafen)
-        except:
-            return render_template('register.html')
-        finally:
-            connection.close()
-
-
 @app.route('/register', methods=["POST"])
 def register():
     return render_template('register.html')
@@ -78,68 +54,51 @@ def addPerson():
             connection.close()
 
 
-@app.route('/passage', methods=["POST"])
-def passage():
-    return render_template('passage.html')
-
-
-@app.route('/inputPassage', methods=["POST"])
-# mehrere Telefon nummer nicht implementiert
-def inputPassage():
+@app.route('/login', methods=["POST"])
+# To Do: enable get and redirect to home
+def login():
     if request.method == "POST":
-        Abfahrtshafen = request.form['Abfahrtshafen']
-        Zielhafen = request.form["Zielhafen"]
+        session.pop('SvNr', None)
         try:
-            connection = sqlite3.connect('first.db')
-            curs = connection.cursor()
-            curs.execute('SELECT Passagennummer FROM PASSAGE where Abfahrtshafen = ? and Zielhafen = ?',
-                         (Abfahrtshafen, Zielhafen))
-            try:
-                Passage_SQL = curs.fetchone()[0]
-                if Passage_SQL:
-                    print("Passage vorhanden")
-                    connection.commit()
-                    curs.close()
-                    # Platzhalter für Weitergabe von Variablen an nächste Seite und dort Zugriff auf SQL mit Buchungserstellung?
-
-                    return render_template('passageTime.html')
-
-            except:
-                connection.rollback()
-                print("Passage nicht vorhanden")
-                connection.commit()
-                curs.close()
-                print("Passagenabfrage durchgeführt")
-                return render_template('home.html')
-
+            SvNr = request.form['SvNr']
+            with sqlite3.connect("first.db") as connection:
+                curs = connection.cursor()
+                curs.execute('SELECT distinct Abfahrtshafen FROM Passage')
+                Abfahrtshafen = curs.fetchall()
+                curs.execute('SELECT SvNr FROM PERSON where SvNr = ?', (SvNr,))
+                if curs.fetchone()[0]:
+                    session['SvNr'] = SvNr
+                    print("bis hier")
+                    print(Abfahrtshafen)
+                    return render_template(('login.html'), Abfahrtshafen=Abfahrtshafen)
         except:
-            connection.rollback()
-            print("Passagenabfrage wurde nicht durchgeführt")
-            return render_template('home.html')
+            return render_template('register.html')
         finally:
             connection.close()
 
 
+
 @app.route('/selectDeparture', methods=["POST", "GET"])
 def selectDeparture():
+    print("!!")
     if g.SvNr and request.method == "POST":
         try:
-            destination = request.form['Hafen']
-            print(destination)
+            departure = request.form['Hafen']
+            print(departure)
             connection = sqlite3.connect('first.db')
             cursor = connection.cursor()
-            cursor.execute("SELECT DISTINCT Abfahrtshafen FROM Passage WHERE Zielhafen LIKE ('%' || ? || '%')", (destination,))
-            departureFrom = cursor.fetchall()
-            print(departureFrom)
-            if departureFrom:
-                response = make_response(render_template('selectDeparture.html', departureFrom=departureFrom))
-                session['Ankunftshafen'] = destination
-                response.set_cookie('Ankunftshafen', destination)
+            cursor.execute("SELECT DISTINCT Zielhafen FROM Passage WHERE Abfahrtshafen LIKE ('%' || ? || '%')", (departure,))
+            print(1)
+            destination = cursor.fetchall()
+            print(destination)
+            if destination:
+                response = make_response(render_template('selectDestination.html', destination=destination))
+                response.set_cookie('departure', departure)
                 return response
             else:
                 cursor.execute('SELECT distinct Abfahrtshafen FROM Passage')
-                Abfahrtshafen = cursor.fetchall()
-                return render_template(('login.html'), Abfahrtshafen=Abfahrtshafen,
+                departure = cursor.fetchall()
+                return render_template(('login.html'), Abfahrtshafen=departure,
                                        Error="Hafen existiert nicht. Bitte geben Sie einen anderen Hafen an.")
 
         #except Exception as e:
@@ -149,30 +108,28 @@ def selectDeparture():
     else:
         return render_template('notLoggedIn.html')
 
-@app.route('/selectArrivalTime', methods=["POST"])
-def selectArrivalTime():
+
+@app.route('/selectDepartureTime', methods=["POST"])
+def selectDepartureTime():
     if g.SvNr:
         try:
-            departureFrom = request.form['Hafen']
+            destination = request.form['Hafen']
             connection = sqlite3.connect('first.db')
             cursor = connection.cursor()
-            destination = request.cookies.get('Ankunftshafen', 0)
-            cursor.execute("SELECT DISTINCT Ankunftszeit FROM Passage WHERE Zielhafen = ? AND Abfahrtshafen = ?", (departureFrom, destination))
-            arrivalTime = cursor.fetchall()
-            if arrivalTime:
-                response = make_response(render_template('selectArrivalTime.html', arrivalTime=arrivalTime))
-                response.set_cookie('Abfahrtshafen', departureFrom)
-                session['Abfahrtshafen'] = departureFrom
+            departure = request.cookies.get('departure', 0)
+            cursor.execute("SELECT DISTINCT Abfahrtszeit FROM Passage WHERE Zielhafen = ? AND Abfahrtshafen = ?", (destination, departure))
+            departureTime = cursor.fetchall()
+            if departureTime:
+                response = make_response(render_template('selectDepartureTime.html', departureTime=departureTime))
+                response.set_cookie('destination', destination)
                 return response
             else:
-                cursor.execute("SELECT DISTINCT Abfahrtshafen FROM Passage WHERE Zielhafen LIKE ('%' || ? || '%')",
-                               (destination,))
-                departureFrom = cursor.fetchall()
-                response = make_response(render_template('selectDeparture.html', departureFrom=departureFrom,
-                                   Error="Hafen existiert nicht. Bitte geben Sie einen anderen Hafen an."))
-                session['Ankunftshafen'] = destination
-                response.set_cookie('Ankunftshafen', destination)
-                return response
+                cursor.execute("SELECT DISTINCT Zielhafen FROM Passage WHERE Abfahrtshafen LIKE ('%' || ? || '%')",
+                               (departure,))
+                destination = cursor.fetchall()
+                return render_template('selectDestination.html', destination=destination,
+                                   Error="Hafen existiert nicht. Bitte geben Sie einen anderen Hafen an.")
+
         finally:
             connection.close()
     else:
@@ -182,33 +139,24 @@ def selectArrivalTime():
 @app.route('/confirmBooking', methods=['POST'])
 def confirmBooking():
     if g.SvNr:
-        Ankunftszeit = request.form['Ankunftszeit']
-        departureFrom = request.cookies.get('Abfahrtshafen', 0)
-        destination = request.cookies.get('Ankunftshafen', 0)
+        departureTime = request.form['departureTime']
+        departure = request.cookies.get('departure', 0)
+        destination = request.cookies.get('destination', 0)
         connection = sqlite3.connect('first.db')
         cursor = connection.cursor()
-        cursor.execute("SELECT DISTINCT Ankunftszeit FROM Passage WHERE Zielhafen = ? AND Abfahrtshafen = ?",
-                       (departureFrom, destination))
+        cursor.execute("SELECT DISTINCT Abfahrtszeit FROM Passage WHERE Zielhafen = ? AND Abfahrtshafen = ?",
+                       (destination, departure))
         SQL_time = cursor.fetchall()
-        if (Ankunftszeit,) in SQL_time:
-            Abfahrtshafen = request.cookies.get('Abfahrtshafen', 0)
-            #print(Abfahrtshafen)
-            Ankunftshafen = request.cookies.get('Ankunftshafen', 0)
-            #print(Ankunftshafen)
+        if (departureTime,) in SQL_time:
             if 'SvNr' in session:
                  SvNr = session['SvNr']
                  print(SvNr)
-            # if 'Ankunftshafen' in session:
-            #     Ankunftshafen = session['Ankunftshafen']
-            #     print(Ankunftshafen)
-            # if 'Abfahrtshafen' in session:
-            #     Abfahrtshafen = session['Abfahrtshafen']
-            response = make_response(render_template('confirmBooking.html', Ankunftshafen=Ankunftshafen, Abfahrtshafen=Abfahrtshafen, SvNr=SvNr, Ankunftszeit=Ankunftszeit))
-            response.set_cookie('Ankunftszeit', Ankunftszeit)
+            response = make_response(render_template('confirmBooking.html', departure=departure, destination=destination, SvNr=SvNr, departureTime=departureTime))
+            response.set_cookie('departureTime', departureTime)
             return response
         else:
-            response = make_response(render_template('selectArrivalTime.html', arrivalTime=SQL_time, Error="Keine Passage zu dieser Uhrzeit. Bitte wählen Sie eine andere Uhrzeit."))
-            return response
+            return render_template('selectDepartureTime.html', departureTime=SQL_time, Error="Keine Passage zu dieser Uhrzeit. Bitte wählen Sie eine andere Uhrzeit.")
+
     else:
         return render_template('notLoggedIn.html')
 
