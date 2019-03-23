@@ -254,12 +254,15 @@ def addPassenger():
         try:
             with sqlite3.connect('first.db') as connection:
                 cursor = connection.cursor()
-                # Abfrage welche die nächste Buchungsnummer ist?
                 cursor.execute("SELECT MAX(Buchungsnummer) FROM Buchen")
-                if cursor.fetchone()[0] == None:
+
+                Buchungsnummer = cursor.fetchone()[0]
+
+                if Buchungsnummer == None:
                     hoechsteBuchungsnummer = 0
                 else:
-                    hoechsteBuchungsnummer = cursor.fetchone()[0]
+                    hoechsteBuchungsnummer = Buchungsnummer
+                    print(hoechsteBuchungsnummer)
                 print(hoechsteBuchungsnummer)
                 neueBuchungsnummer = int(hoechsteBuchungsnummer) + 1
                 print(neueBuchungsnummer)
@@ -274,6 +277,13 @@ def addPassenger():
             with sqlite3.connect('first.db') as connection:
                 Klasse = '0'
                 curs = connection.cursor()
+                
+                curs.execute("SELECT SVNR, Passagennummer FROM buchen")
+
+                for i in curs.fetchall():
+                    if SvNr in i and selectedPassagennummer in i:
+                        return render_template('bookingalreadyexists.html')
+
                 curs.execute("INSERT INTO BUCHEN (Buchungsnummer, SVNR, Passagennummer, Klasse) VALUES (?, ?, ?, ?)", (neueBuchungsnummer, SvNr, selectedPassagennummer, Klasse,))
                 print("Buchung eingetragen")
                 connection.commit()
@@ -299,11 +309,11 @@ def deleteEntry():
         table = request.form["table"]
         Pkey = ""
         entry = request.form["entry"]
-        if table == "PERSON":
+        if table.lower() == "PERSON".lower():
             Pkey = "SVNr"
-        elif table == "PASSAGE":
+        elif table.lower() == "PASSAGE".lower():
             Pkey = "Passagennumer"
-        elif table == "BUCHUNG":
+        elif table.lower() == "BUCHEN".lower():
             Pkey = "Buchungsnummer"
         print(table + "\n" + Pkey + "\n" + entry)
         try:
