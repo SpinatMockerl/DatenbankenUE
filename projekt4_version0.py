@@ -256,7 +256,10 @@ def addPassenger():
                 cursor = connection.cursor()
                 # Abfrage welche die nächste Buchungsnummer ist?
                 cursor.execute("SELECT MAX(Buchungsnummer) FROM Buchen")
-                hoechsteBuchungsnummer = cursor.fetchone()[0]
+                if cursor.fetchone()[0] == None:
+                    hoechsteBuchungsnummer = 0
+                else:
+                    hoechsteBuchungsnummer = cursor.fetchone()[0]
                 print(hoechsteBuchungsnummer)
                 neueBuchungsnummer = int(hoechsteBuchungsnummer) + 1
                 print(neueBuchungsnummer)
