@@ -282,7 +282,7 @@ def addPassenger():
         except:
             connection.rollback()
             print("Buchung nicht eingetragen")
-            return render_template('home.html')
+            return render_template('bookingalreadyexists.html')
         finally:
             connection.close()
 

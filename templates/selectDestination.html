@@ -8,14 +8,14 @@
     <form action = "/logout" method="POST" >
         <input type="submit" value="Logout">
     </form>
-    <p>Please type in your Destination port</p>
+    <h1>Please type in your Destination port</h1>
         {% for Hafen in destination %}
         <p>{{Hafen[0]}}</p>
         {% endfor %}
     <p>{{Error}}</p>
     <form action = "/selectDepartureTime" method="POST" >
         <input type="text" name = "Hafen">
-        <input type="submit" value = "Origin Port">
+        <input type="submit" value = "submit">
     </form>
 
 </body>
