@@ -2,16 +2,17 @@
 # coding: utf8
 
 import sqlite3
-from flask import Flask, render_template, make_response, request, session, redirect, g
+from flask import Flask, render_template, make_response, request, session, g
 import os
 
 
 # Flask constructor: define application as Flask object
 app = Flask(__name__)
 app.secret_key = os.urandom(24)     # secret_key later used in session setup
+database = 'first.db'
 
 
-# check session ID
+# required for session ID cookie
 @app.before_request
 def before_request():
     g.SvNr = None
@@ -48,7 +49,7 @@ def addPerson():
         HausNr = request.form["HausNr"]
 
         try:
-            connection = sqlite3.connect('first.db')
+            connection = sqlite3.connect(database)
             curs = connection.cursor()
             curs.execute("INSERT INTO PERSON (SVNr, Vorname, Nachname, PLZ, Ort, Strasse, Hausnr) VALUES "
                          "(?, ?, ?, ?, ?, ?, ?)", (SVNr, Vorname, Nachname, PLZ, Ort, Strasse, HausNr))
@@ -63,6 +64,8 @@ def addPerson():
             return render_template('userExists.html')
         finally:
             connection.close()
+    else:
+        return render_template('home.html')
 
 
 # DELETE 1
@@ -87,7 +90,7 @@ def deleteEntry():
             return render_template("delete.html", Error="This relation does not exist")
         print(table + "\n" + Pkey + "\n" + entry)
         try:
-            connection = sqlite3.connect('first.db')
+            connection = sqlite3.connect(database)
             curs = connection.cursor()
             curs.execute("SELECT * FROM {} WHERE {} = (?)".format(table, Pkey, entry), (entry,))
             if curs.fetchone():
@@ -105,52 +108,54 @@ def deleteEntry():
             return render_template('home.html')
         finally:
             connection.close()
+    else:
+        return render_template('home.html')
 
 
 # BOOKING 0
 @app.route('/logout', methods=["POST"])
 def logout():
+    response = make_response(render_template('logout.html'))
     session.pop('SvNr', None)
-    return render_template('logout.html')
+    response.set_cookie('departure', expires=0)
+    response.set_cookie('destination', expires=0)
+    response.set_cookie('departureTime', expires=0)
+    return response
 
 
 # BOOKING 1
-@app.route('/login', methods=["POST"])
-# To Do: enable get and redirect to home
-def login():
+@app.route('/selectDeparture', methods=["POST"])
+def selectDeparture():
     if request.method == "POST":
         session.pop('SvNr', None)
         try:
             SvNr = request.form['SvNr']
-            with sqlite3.connect("first.db") as connection:
-                curs = connection.cursor()
-                curs.execute('SELECT distinct Abfahrtshafen FROM Passage')
-                Abfahrtshafen = curs.fetchall()
-                curs.execute('SELECT SvNr FROM PERSON where SvNr = (?)', (SvNr,))
-                if curs.fetchone()[0]:
-                    session['SvNr'] = SvNr
-                    print("bis hier")
-                    print(Abfahrtshafen)
-                    return render_template(('login.html'), Abfahrtshafen=Abfahrtshafen)
+            connection = sqlite3.connect(database)
+            curs = connection.cursor()
+            curs.execute('SELECT distinct Abfahrtshafen FROM Passage')
+            departure = curs.fetchall()
+            curs.execute('SELECT SvNr FROM PERSON where SvNr = (?)', (SvNr,))
+            if curs.fetchone()[0]:
+                session['SvNr'] = SvNr
+                return render_template(('selectDeparture.html'), Abfahrtshafen=departure)
         except:
             return render_template('register.html')
         finally:
             connection.close()
+    else:
+        return render_template('home.html')
 
 
 # BOOKING 2
-@app.route('/selectDeparture', methods=["POST", "GET"])
-def selectDeparture():
-    print("!!")
+@app.route('/selectDestination', methods=["POST", "GET"])
+def selectDestination():
     if g.SvNr and request.method == "POST":
         try:
             departure = request.form['Hafen']
-            print(departure)
-            connection = sqlite3.connect('first.db')
+            connection = sqlite3.connect(database)
             cursor = connection.cursor()
             cursor.execute("SELECT DISTINCT Zielhafen FROM Passage WHERE Abfahrtshafen = (?)", (departure,))
             destination = cursor.fetchall()
-            print(destination)
             if destination:
                 response = make_response(render_template('selectDestination.html', destination=destination))
                 response.set_cookie('departure', departure)
@@ -158,11 +163,8 @@ def selectDeparture():
             else:
                 cursor.execute('SELECT distinct Abfahrtshafen FROM Passage')
                 departure = cursor.fetchall()
-                return render_template(('login.html'), Abfahrtshafen=departure,
+                return render_template(('selectDeparture.html'), Abfahrtshafen=departure,
                                        Error="Departure does not exist. Please choose one of the listed departures")
-
-        #except Exception as e:
-        #    return e
         finally:
             connection.close()
     else:
@@ -175,7 +177,7 @@ def selectDepartureTime():
     if g.SvNr:
         try:
             destination = request.form['Hafen']
-            connection = sqlite3.connect('first.db')
+            connection = sqlite3.connect(database)
             cursor = connection.cursor()
             departure = request.cookies.get('departure', 0)
             cursor.execute("SELECT DISTINCT Abfahrtszeit FROM Passage WHERE Zielhafen = (?) AND Abfahrtshafen = (?)", (destination, departure))
@@ -189,7 +191,6 @@ def selectDepartureTime():
                 destination = cursor.fetchall()
                 return render_template('selectDestination.html', destination=destination,
                                        Error="Destination does not exist. Please choose one of the listed destinations")
-
         finally:
             connection.close()
     else:
@@ -203,20 +204,25 @@ def confirmBooking():
         departureTime = request.form['departureTime']
         departure = request.cookies.get('departure', 0)
         destination = request.cookies.get('destination', 0)
-        connection = sqlite3.connect('first.db')
+        connection = sqlite3.connect(database)
         cursor = connection.cursor()
         cursor.execute("SELECT DISTINCT Abfahrtszeit FROM Passage WHERE Zielhafen = (?) AND Abfahrtshafen = (?)",
                        (destination, departure))
         SQL_time = cursor.fetchall()
         if (departureTime,) in SQL_time:
-            if 'SvNr' in session:
-                 SvNr = session['SvNr']
-                 print(SvNr)
-            response = make_response(render_template('confirmBooking.html', departure=departure, destination=destination, SvNr=SvNr, departureTime=departureTime))
+            try:
+                cursor.execute("SELECT Vorname FROM PERSON where SvNr = (?)", (session['SvNr'],))
+                person = cursor.fetchone()[0]
+            except:
+                person = session['SvNr']
+            response = make_response(render_template('confirmBooking.html', departure=departure,
+                                                     destination=destination, person=person,
+                                                     departureTime=departureTime))
             response.set_cookie('departureTime', departureTime)
             return response
         else:
-            return render_template('selectDepartureTime.html', departureTime=SQL_time, Error="No departure at this time. Please choose another departure time")
+            return render_template('selectDepartureTime.html', departureTime=SQL_time,
+                                   Error="No departure at this time. Please choose another departure time")
 
     else:
         return render_template('notLoggedIn.html')
@@ -224,75 +230,61 @@ def confirmBooking():
 
 # BOOKING 5
 @app.route('/addPassenger', methods=["POST"])
-# mehrere Telefon nummer nicht implementiert
 def addPassenger():
     if request.method == "POST":
-        departureTime = request.cookies.get('departureTime', 0)
-
         departure = request.cookies.get('departure', 0)
         destination = request.cookies.get('destination', 0)
-        # print('Ankunftshafen: ' + Ankunftshafen)
-        # print('Ankunftszeit: ' + Ankunftszeit)
-        # print('Abfahrtshafen: ' + departure)
+        departureTime = request.cookies.get('departureTime', 0)
 
         if 'SvNr' in session:
             SvNr = session['SvNr']
-            print(SvNr)
 
+        # find Passagennummer
         try:
-            with sqlite3.connect("first.db") as connection:
-                cursor = connection.cursor()
-                cursor.execute(
-                    '''select Passagennummer from Passage where Zielhafen = (?) AND Abfahrtshafen = (?) AND Abfahrtszeit =(?)''',
-                    (destination, departure, departureTime,))
-                selectedPassagennummer = cursor.fetchone()[0]
-                print(selectedPassagennummer)
-        ## zurück senden falls es zu fehler kommt
+            connection = sqlite3.connect(database)
+            cursor = connection.cursor()
+            cursor.execute(
+                '''select Passagennummer from Passage where Zielhafen = (?) 
+                AND Abfahrtshafen = (?) AND Abfahrtszeit =(?)''', (destination, departure, departureTime,))
+            selectedPassagennummer = cursor.fetchone()[0]
         except:
             connection.rollback()
         finally:
             connection.close()
 
-        # neue buchungsnummer erstellen
+        # create Buchungsnummer
         try:
-            with sqlite3.connect('first.db') as connection:
-                cursor = connection.cursor()
-                cursor.execute("SELECT MAX(Buchungsnummer) FROM Buchen")
-
-                Buchungsnummer = cursor.fetchone()[0]
-
-                if Buchungsnummer == None:
-                    hoechsteBuchungsnummer = 0
-                else:
-                    hoechsteBuchungsnummer = Buchungsnummer
-                    print(hoechsteBuchungsnummer)
-                print(hoechsteBuchungsnummer)
-                neueBuchungsnummer = int(hoechsteBuchungsnummer) + 1
-                print(neueBuchungsnummer)
-
-        # was wäre eine gute exception?
+            connection = sqlite3.connect(database)
+            cursor = connection.cursor()
+            cursor.execute("SELECT MAX(Buchungsnummer) FROM Buchen")
+            Buchungsnummer = cursor.fetchone()[0]
+            if Buchungsnummer == None:
+                hoechsteBuchungsnummer = 0
+            else:
+                hoechsteBuchungsnummer = Buchungsnummer
+            neueBuchungsnummer = int(hoechsteBuchungsnummer) + 1
         except:
+            connection.rollback()
             print('something went wrong')
         finally:
             connection.close()
 
+        # create Buchung
         try:
-            with sqlite3.connect('first.db') as connection:
-                Klasse = '0'
-                curs = connection.cursor()
+            connection = sqlite3.connect(database)
+            Klasse = '0'
+            curs = connection.cursor()
+            curs.execute("SELECT SVNR, Passagennummer FROM buchen")
+            for i in curs.fetchall():
+                if SvNr in i and selectedPassagennummer in i:
+                    return render_template('bookingalreadyexists.html')
 
-                curs.execute("SELECT SVNR, Passagennummer FROM buchen")
-
-                for i in curs.fetchall():
-                    if SvNr in i and selectedPassagennummer in i:
-                        return render_template('bookingalreadyexists.html')
-
-                curs.execute("INSERT INTO BUCHEN (Buchungsnummer, SVNR, Passagennummer, Klasse) VALUES (?, ?, ?, ?)",
-                             (neueBuchungsnummer, SvNr, selectedPassagennummer, Klasse,))
-                print("Buchung eingetragen")
-                connection.commit()
-                curs.close()
-                return render_template('bookingDone.html')
+            curs.execute("INSERT INTO BUCHEN (Buchungsnummer, SVNR, Passagennummer, Klasse) VALUES (?, ?, ?, ?)",
+                         (neueBuchungsnummer, SvNr, selectedPassagennummer, Klasse,))
+            print("Buchung eingetragen")
+            connection.commit()
+            curs.close()
+            return render_template('bookingDone.html')
         except:
             connection.rollback()
             print("Buchung nicht eingetragen")
@@ -301,18 +293,17 @@ def addPassenger():
             connection.close()
 
 
-# Basic setup if you want to check if session is active and only tehn do sth.
-@app.route('/login_p', methods=["POST"])
-def login_p():
+# Basic setup if you want to check if session is active and only then do sth.
+@app.route('/dummy', methods=["POST"])
+def dummy():
     if g.SvNr:
         return render_template('dummyTemplate.html')
-
     else:
         return render_template('notLoggedIn.html')
-
 
 
 if __name__ == '__main__':
     # Flask .run() function: runs application on local development server
     # debug = True will automatically update site when code changes
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(port=port, debug=True)

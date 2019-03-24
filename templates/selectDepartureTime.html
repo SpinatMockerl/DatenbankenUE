@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title> Page to select arrival time. </title>
+    <title> Departure Time </title>
 </head>
 <body>
     <form action = "/logout" method="POST" >
         <input type="submit" value="Logout">
     </form>
-    <h1> Please select Departure time </h1>
+    <h2> Please select Departure time </h2>
     {% for time in departureTime %}
         <p>{{time[0]}}</p>
-        {% endfor %}
-    <p>{{Error}}</p>
+    {% endfor %}
     <form action = "/confirmBooking" method="POST" >
         <input type="text" name = "departureTime" required>
         <input type="submit" value = "submit">
     </form>
+    <p>{{Error}}</p>
 </body>
 </html>
