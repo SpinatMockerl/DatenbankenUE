@@ -14,7 +14,7 @@
         {% endfor %}
     <p>{{Error}}</p>
     <form action = "/confirmBooking" method="POST" >
-        <input type="text" name = "departureTime">
+        <input type="text" name = "departureTime" required>
         <input type="submit" value = "submit">
     </form>
 </body>
