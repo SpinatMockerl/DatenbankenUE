@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <body>
+    <title> Registration </title>
 	<!-- action form to send to function add person when submitted -->
 	<form action = "/returnHome" method="POST" >
 		<input type="submit" value="Home">
@@ -8,32 +9,32 @@
 	<form action = "/addPerson" method="POST" >
 	<h1> This is the registration page </h1>
 	<h2> Please enter requested information </h2>
-		<h4> SvNr</h4>
+		<h4> Social Security Number / SvNr</h4>
 		<input type="text" name = "SVNr" required pattern="[0-9]{10}"
 		title="Must be a number of exactly 10 digits">
-		<h4> Vorname</h4>
+		<h4> First Name</h4>
 		<input type="text" name = "Vorname" pattern="[A-Za-zÄÖÜäöü -]{1,20}"
 		title="Can only include letters, spaces, dashes and Ä, Ö, Ü">
-		<h4> Nachname</h4>
+		<h4> Last Name</h4>
 		<input type="text" name = "Nachname" pattern="[A-Za-zÄÖÜäöü -]{1,20}"
 		title="Can only include letters, spaces, dashes and Ä, Ö, Ü">
-		<h4> PLZ </h4>
+		<h4> ZIP-Code / PLZ </h4>
 		<input type="text" name = "PLZ" pattern="[0-9]{3,10}"
 		title="Must be a number of 3-10 digits">
-		<h4> Ort </h4>
+		<h4> City </h4>
 		<input type="text" name = "Ort" pattern="[A-Za-zÄÖÜäöü -]{1,20}"
 		title="Can only include letters, spaces, dashes and Ä, Ö, Ü">
-		<h4> Strasse </h4>
+		<h4> Street </h4>
 		<input type="text" name = "Strasse" pattern="[A-Za-zÄÖÜäöü -]{1,20}"
 		title="Can only include letters, spaces, dashes and Ä, Ö, Ü">
-		<h4> HausNr </h4>
-		<input type="text" name = "HausNr" pattern="[0-9]{1,5}"
+		<h4> Street Number </h4>
+		<input type="text" name = "HausNr" pattern="[0-9A-Za-z]{1,5}"
 		title="Must be a number of 1-5 digits">
 		<!--
 		<h4> TelefonNr</h4>
 		<input type="text" name = "TelefonNr">
 		-->
-		<input type="submit" value = "submit">
+		<input type="submit" value = "Submit">
 		<!-- submit -->
 	</form>
 </body>
