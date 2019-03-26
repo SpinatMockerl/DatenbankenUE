@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title> Cookie collection, display of selected passage and booking confirmation</title>
+    <title> Booking Confirmation </title>
 </head>
 <body>
     <form action = "/logout" method="POST" >
         <input type="submit" value="Logout">
     </form>
-    <h1> Hi {{ SvNr }}</h1>
+    <h1> Hi {{ person }}</h1>
     <p> Are these selections correct?</p>
     <p> Departure: {{ departure }}</p>
     <p> Destination: {{ destination }}</p>
